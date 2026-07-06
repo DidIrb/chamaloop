@@ -18,10 +18,10 @@ const register = async (req, res) => {
   const conn = await pool.getConnection();
   try {
     // Only one Chama per installation
-    // const [existing] = await conn.query('SELECT chama_id FROM chama_config LIMIT 1');
-    // if (existing.length > 0) {
-    //   return res.status(400).json({ message: 'A Chama is already registered on this system.' });
-    // }
+    const [existing] = await conn.query('SELECT chama_id FROM chama_config LIMIT 1');
+    if (existing.length > 0) {
+      return res.status(400).json({ message: 'A Chama is already registered on this system.' });
+    }
 
     // Check phone number not already in use
     const [existingUser] = await conn.query('SELECT user_id FROM users WHERE phone_number = ?', [phone_number]);
