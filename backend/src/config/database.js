@@ -3,7 +3,6 @@ const mysql = require('mysql2/promise');
 // Create a connection pool — better than a single connection for web apps
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT || 3307, 
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_NAME || 'chamaloop',
@@ -22,6 +21,9 @@ const initDB = async () => {
         contribution_amount DECIMAL(10,2) NOT NULL,
         fine_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
         meeting_frequency VARCHAR(50) NOT NULL DEFAULT 'Monthly',
+        location_name VARCHAR(255),
+        latitude DECIMAL(10,7),
+        longitude DECIMAL(10,7),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
@@ -32,7 +34,10 @@ const initDB = async () => {
         name VARCHAR(255) NOT NULL,
         phone_number VARCHAR(20) NOT NULL UNIQUE,
         rotation_order INT,
-        date_joined TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        date_joined TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        business_name VARCHAR(255),
+        business_type VARCHAR(100),
+        business_location VARCHAR(255)
       );
     `);
 

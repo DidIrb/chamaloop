@@ -9,7 +9,7 @@ const {
 } = require('../middleware/validators');
 
 const { register, login, forgotPin, resetPin } = require('../controllers/authController');
-const { getAllMembers, addMember, updateRotationOrder, resetMemberPin } = require('../controllers/membersController');
+const { getAllMembers, addMember, updateRotationOrder, resetMemberPin, updateMemberBusiness } = require('../controllers/membersController');
 const { getActiveRound, startRound, closeRound, markContributionPaid, markContributionLate } = require('../controllers/roundsController');
 const { getHistory } = require('../controllers/historyController');
 const { getSettings, updateSettings } = require('../controllers/settingsController');
@@ -25,6 +25,7 @@ router.get('/members', authenticate, getAllMembers);
 router.post('/members', authenticate, adminOnly, addMemberValidator, validate, addMember);
 router.put('/members/:id/rotation', authenticate, adminOnly, updateRotationValidator, validate, updateRotationOrder);
 router.put('/members/:id/reset-pin', authenticate, adminOnly, resetMemberPinValidator, validate, resetMemberPin);
+router.put('/members/:id/business', authenticate, adminOnly, updateMemberBusiness);
 
 // ── Round routes
 router.get('/rounds/active', authenticate, getActiveRound);

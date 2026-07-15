@@ -16,7 +16,7 @@ const getSettings = async (req, res) => {
 
 // PUT /api/settings
 const updateSettings = async (req, res) => {
-  const { chama_name, contribution_amount, fine_amount, meeting_frequency } = req.body;
+  const { chama_name, contribution_amount, fine_amount, meeting_frequency, location_name, latitude, longitude } = req.body;
 
   if (!chama_name || !contribution_amount) {
     return res.status(400).json({ message: 'Chama name and contribution amount are required.' });
@@ -30,9 +30,14 @@ const updateSettings = async (req, res) => {
 
     await pool.query(
       `UPDATE chama_config
-       SET chama_name = ?, contribution_amount = ?, fine_amount = ?, meeting_frequency = ?
+       SET chama_name = ?, contribution_amount = ?, fine_amount = ?, meeting_frequency = ?,
+           location_name = ?, latitude = ?, longitude = ?
        WHERE chama_id = ?`,
-      [chama_name, contribution_amount, fine_amount || 0, meeting_frequency || 'Monthly', config[0].chama_id]
+      [
+        chama_name, contribution_amount, fine_amount || 0, meeting_frequency || 'Monthly',
+        location_name || null, latitude || null, longitude || null,
+        config[0].chama_id
+      ]
     );
 
     return res.status(200).json({ message: 'Settings updated successfully.' });

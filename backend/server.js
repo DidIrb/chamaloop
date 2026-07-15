@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 const routes = require('./src/routes/index');
 const { initDB } = require('./src/config/database');
 
@@ -15,6 +16,17 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 app.use(express.json());
+
+// Rate limit login attempts — max 5 per phone number per 15 minutes
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  keyGenerator: (req) => req.body?.phone_number || req.ip,
+  message: { message: 'Too many login attempts. Please wait 15 minutes before trying again.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api/auth/login', loginLimiter);
 
 // All routes prefixed with /api
 app.use('/api', routes);

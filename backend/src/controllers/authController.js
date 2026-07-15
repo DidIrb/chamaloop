@@ -5,7 +5,8 @@ const { pool } = require('../config/database');
 // POST /api/auth/register
 const register = async (req, res) => {
   const { chama_name, contribution_amount, fine_amount, meeting_frequency,
-          admin_name, phone_number, email, pin } = req.body;
+          admin_name, phone_number, email, pin,
+          location_name, latitude, longitude } = req.body;
 
   if (!chama_name || !contribution_amount || !admin_name || !phone_number || !pin) {
     return res.status(400).json({ message: 'Please fill in all required fields.' });
@@ -35,8 +36,8 @@ const register = async (req, res) => {
 
     // Insert Chama config
     await conn.query(
-      'INSERT INTO chama_config (chama_name, contribution_amount, fine_amount, meeting_frequency) VALUES (?, ?, ?, ?)',
-      [chama_name, contribution_amount, fine_amount || 0, meeting_frequency || 'Monthly']
+      'INSERT INTO chama_config (chama_name, contribution_amount, fine_amount, meeting_frequency, location_name, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [chama_name, contribution_amount, fine_amount || 0, meeting_frequency || 'Monthly', location_name || null, latitude || null, longitude || null]
     );
 
     // Insert admin as a member first

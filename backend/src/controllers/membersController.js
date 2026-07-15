@@ -31,7 +31,7 @@ const getAllMembers = async (req, res) => {
 
 // POST /api/members — admin adds a new member
 const addMember = async (req, res) => {
-  const { name, phone_number, pin } = req.body;
+  const { name, phone_number, pin, business_name, business_type, business_location } = req.body;
 
   if (!name || !phone_number || !pin) {
     return res.status(400).json({ message: 'Name, phone number and PIN are required.' });
@@ -57,8 +57,8 @@ const addMember = async (req, res) => {
     await conn.beginTransaction();
 
     const [memberResult] = await conn.query(
-      'INSERT INTO members (name, phone_number, rotation_order) VALUES (?, ?, ?)',
-      [name, phone_number, rotation_order]
+      'INSERT INTO members (name, phone_number, rotation_order, business_name, business_type, business_location) VALUES (?, ?, ?, ?, ?, ?)',
+      [name, phone_number, rotation_order, business_name || null, business_type || null, business_location || null]
     );
 
     await conn.query(
@@ -128,4 +128,27 @@ const resetMemberPin = async (req, res) => {
   }
 };
 
-module.exports = { getAllMembers, addMember, updateRotationOrder, resetMemberPin };
+// PUT /api/members/:id/business
+const updateMemberBusiness = async (req, res) => {
+  const { id } = req.params;
+  const { business_name, business_type, business_location } = req.body;
+
+  try {
+    const [member] = await pool.query('SELECT * FROM members WHERE member_id = ?', [id]);
+    if (member.length === 0) {
+      return res.status(404).json({ message: 'Member not found.' });
+    }
+
+    await pool.query(
+      'UPDATE members SET business_name = ?, business_type = ?, business_location = ? WHERE member_id = ?',
+      [business_name || null, business_type || null, business_location || null, id]
+    );
+
+    return res.status(200).json({ message: 'Business info updated successfully.' });
+  } catch (error) {
+    console.error('Update business info error:', error);
+    return res.status(500).json({ message: 'Something went wrong.' });
+  }
+};
+
+module.exports = { getAllMembers, addMember, updateRotationOrder, resetMemberPin, updateMemberBusiness };
