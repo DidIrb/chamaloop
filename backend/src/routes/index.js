@@ -13,6 +13,7 @@ const { getAllMembers, addMember, updateRotationOrder, resetMemberPin, updateMem
 const { getActiveRound, startRound, closeRound, markContributionPaid, markContributionLate } = require('../controllers/roundsController');
 const { getHistory } = require('../controllers/historyController');
 const { getSettings, updateSettings } = require('../controllers/settingsController');
+const { generateWordReport, generatePdfReport } = require('../controllers/reportsController');
 
 // ── Auth routes (public)
 router.post('/auth/register', registerValidator, validate, register);
@@ -36,6 +37,10 @@ router.put('/rounds/:roundId/contributions/:memberId/late', authenticate, adminO
 
 // ── History (read only)
 router.get('/history', authenticate, getHistory);
+
+// ── Reports (admin only)
+router.get('/reports/word', authenticate, adminOnly, generateWordReport);
+router.get('/reports/pdf', authenticate, adminOnly, generatePdfReport);
 
 // ── Settings
 router.get('/settings', authenticate, getSettings);

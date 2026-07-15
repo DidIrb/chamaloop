@@ -12,6 +12,35 @@ const Dashboard = () => {
   const [actionLoading, setActionLoading] = useState('');
   const [success, setSuccess] = useState('');
 
+  // Reports
+  const now = new Date();
+  const [reportYear, setReportYear] = useState(now.getFullYear());
+  const [reportMonth, setReportMonth] = useState(now.getMonth() + 1);
+  const [reportLoading, setReportLoading] = useState('');
+
+  const handleDownloadReport = async (format) => {
+    setReportLoading(format);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/reports/${format}?year=${reportYear}&month=${reportMonth}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!res.ok) throw new Error('Failed to generate report.');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ChamaLoop_Report_${reportMonth}_${reportYear}.${format === 'word' ? 'docx' : 'pdf'}`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setError('Failed to generate report. Please try again.');
+    } finally {
+      setReportLoading('');
+    }
+  };
+
   const fetchDashboard = async () => {
     try {
       const [roundRes, membersRes] = await Promise.all([
@@ -232,6 +261,43 @@ const Dashboard = () => {
           </button>
         </>
       )}
+
+      {/* Monthly Reports */}
+      <div className="form-card" style={{ marginTop: '2rem' }}>
+        <div className="form-title">Monthly Reports</div>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+          <div className="field" style={{ margin: 0 }}>
+            <label>Month</label>
+            <select value={reportMonth} onChange={(e) => setReportMonth(Number(e.target.value))} style={{ padding: '8px 12px', border: '1px solid #ddd', borderRadius: '7px', fontSize: '13.5px' }}>
+              {['January','February','March','April','May','June','July','August','September','October','November','December']
+                .map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
+            </select>
+          </div>
+          <div className="field" style={{ margin: 0 }}>
+            <label>Year</label>
+            <input
+              type="number" value={reportYear}
+              onChange={(e) => setReportYear(Number(e.target.value))}
+              style={{ width: '90px', padding: '8px 12px', border: '1px solid #ddd', borderRadius: '7px', fontSize: '13.5px' }}
+            />
+          </div>
+          <button
+            className="btn primary"
+            onClick={() => handleDownloadReport('word')}
+            disabled={!!reportLoading}
+          >
+            {reportLoading === 'word' ? 'Generating...' : '↓ Download Word'}
+          </button>
+          <button
+            className="btn"
+            style={{ borderColor: '#1D9E75', color: '#0F6E56' }}
+            onClick={() => handleDownloadReport('pdf')}
+            disabled={!!reportLoading}
+          >
+            {reportLoading === 'pdf' ? 'Generating...' : '↓ Download PDF'}
+          </button>
+        </div>
+      </div>
     </Layout>
   );
 };
